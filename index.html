@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pointage Hafid Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            background-color: #0f1218;
+            color: white;
+            font-family: 'Arial Black', Gadget, sans-serif; /* خط عريض يشبه نموذج البادل */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .header-box {
+            background: rgba(25, 33, 50, 0.85);
+            padding: 15px 20px;
+            border-radius: 18px;
+            width: 95%;
+            max-width: 380px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* تنسيق العنوان بحال البادل */
+        .header-box h2 { 
+            margin: 0; 
+            font-size: 1.2rem; 
+            font-style: italic; 
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: #4A90E2; /* اللون الأزرق لـ POINTAGE */
+        }
+        
+        .header-box h2 span { 
+            color: white; /* اللون الأبيض لـ HAFID */
+        }
+
+        .table-container {
+            background: rgba(30, 37, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            width: 95%;
+            max-width: 380px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .labels-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 1fr;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .label { 
+            font-size: 0.65rem; 
+            color: #4A90E2; 
+            text-align: center; 
+            font-weight: bold;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .data-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #FFD700;
+            padding: 10px 2px;
+            font-size: 0.75rem;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .actions { display: flex; gap: 12px; align-items: center; }
+
+        .btn-small {
+            width: 32px; height: 32px; border-radius: 50%; border: none;
+            color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .btn-blue { background: #2E5BFF; }
+        .btn-red { background: rgba(255, 77, 77, 0.2); color: #FF4D4D; border: 1px solid #FF4D4D; padding-bottom: 4px; }
+
+        .btn-pdf { 
+            background: #00A651; border-radius: 8px; padding: 6px 15px; 
+            border: none; color: white; font-size: 0.7rem; font-weight: bold; cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .footer-name {
+            margin-top: 20px; font-size: 0.6rem; color: rgba(255, 255, 255, 0.2);
+            width: 95%; max-width: 380px; text-align: right; letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-box">
+        <h2>POINTAGE <span>HAFID</span></h2>
+        <div class="actions">
+            <button class="btn-small btn-blue" onclick="addRow()">+</button>
+            <button class="btn-small btn-red" onclick="removeRow()">−</button>
+            <button class="btn-pdf" onclick="generatePDF()">PDF</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="labels-row">
+            <div class="label">DATE</div>
+            <div class="label">STATUT</div>
+            <div class="label">H/E</div>
+            <div class="label">H/S</div>
+        </div>
+        <div id="tableBody"></div>
+    </div>
+
+    <div class="footer-name">HFID SAJIDI</div>
+
+    <script>
+        function addRow() {
+            const container = document.getElementById('tableBody');
+            const row = document.createElement('div');
+            row.className = 'data-row';
+            row.innerHTML = `
+                <input type="text" placeholder="00/00">
+                <input type="text" placeholder="...">
+                <input type="text" placeholder="00:00">
+                <input type="text" placeholder="00:00">
+            `;
+            container.appendChild(row);
+        }
+
+        function removeRow() {
+            const container = document.getElementById('tableBody');
+            if (container.lastElementChild) {
+                container.removeChild(container.lastElementChild);
+            }
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text("RAPPORT DE POINTAGE - HAFID SAJIDI", 14, 20);
+            
+            const rows = [];
+            document.querySelectorAll('.data-row').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const rowData = Array.from(inputs).map(i => i.value);
+                if (rowData.some(v => v !== "")) rows.push(rowData);
+            });
+
+            doc.autoTable({
+                head: [['DATE', 'STATUT', 'ENTRÉE', 'SORTIE']],
+                body: rows,
+                startY: 30,
+                theme: 'grid',
+                headStyles: { fillColor: [46, 91, 255] }
+            });
+            doc.save('Pointage_Hafid_Pro.pdf');
+        }
+
+        for(let i=0; i<8; i++) addRow();
+    </script>
+</body>
+</html>
