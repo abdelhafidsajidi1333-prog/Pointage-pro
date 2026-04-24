@@ -10,7 +10,7 @@
         body {
             background-color: #0f1218;
             color: white;
-            font-family: 'Arial Black', Gadget, sans-serif; /* خط عريض يشبه نموذج البادل */
+            font-family: 'Arial Black', Gadget, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -32,20 +32,13 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* تنسيق العنوان بحال البادل */
         .header-box h2 { 
-            margin: 0; 
-            font-size: 1.2rem; 
-            font-style: italic; 
-            text-transform: uppercase;
-            font-weight: 900;
-            letter-spacing: -1px;
-            color: #4A90E2; /* اللون الأزرق لـ POINTAGE */
+            margin: 0; font-size: 1.2rem; font-style: italic; 
+            text-transform: uppercase; font-weight: 900; letter-spacing: -1px;
+            color: #4A90E2; 
         }
         
-        .header-box h2 span { 
-            color: white; /* اللون الأبيض لـ HAFID */
-        }
+        .header-box h2 span { color: white; }
 
         .table-container {
             background: rgba(30, 37, 50, 0.5);
@@ -66,11 +59,8 @@
         }
 
         .label { 
-            font-size: 0.65rem; 
-            color: #4A90E2; 
-            text-align: center; 
-            font-weight: bold;
-            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.65rem; color: #4A90E2; text-align: center; 
+            font-weight: bold; font-family: 'Segoe UI', sans-serif;
         }
 
         .data-row {
@@ -100,16 +90,14 @@
             width: 32px; height: 32px; border-radius: 50%; border: none;
             color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            touch-action: manipulation;
         }
 
         .btn-blue { background: #2E5BFF; }
-        .btn-red { background: rgba(255, 77, 77, 0.2); color: #FF4D4D; border: 1px solid #FF4D4D; padding-bottom: 4px; }
+        .btn-red { background: rgba(255, 77, 77, 0.2); color: #FF4D4D; border: 1px solid #FF4D4D; }
 
         .btn-pdf { 
             background: #00A651; border-radius: 8px; padding: 6px 15px; 
             border: none; color: white; font-size: 0.7rem; font-weight: bold; cursor: pointer;
-            touch-action: manipulation;
         }
 
         .footer-name {
@@ -163,29 +151,44 @@
         }
 
         function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text("RAPPORT DE POINTAGE - HAFID SAJIDI", 14, 20);
-            
-            const rows = [];
-            document.querySelectorAll('.data-row').forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                const rowData = Array.from(inputs).map(i => i.value);
-                if (rowData.some(v => v !== "")) rows.push(rowData);
-            });
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(18);
+                doc.text("RAPPORT DE POINTAGE - HAFID SAJIDI", 14, 20);
+                
+                const rows = [];
+                document.querySelectorAll('.data-row').forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const rowData = Array.from(inputs).map(i => i.value);
+                    if (rowData.some(v => v.trim() !== "")) rows.push(rowData);
+                });
 
-            doc.autoTable({
-                head: [['DATE', 'STATUT', 'ENTRÉE', 'SORTIE']],
-                body: rows,
-                startY: 30,
-                theme: 'grid',
-                headStyles: { fillColor: [46, 91, 255] }
-            });
-            doc.save('Pointage_Hafid_Pro.pdf');
+                if (rows.length === 0) {
+                    alert("عمر شي خانة أولاً أبا حفيظ!");
+                    return;
+                }
+
+                doc.autoTable({
+                    head: [['DATE', 'STATUT', 'ENTREE', 'SORTIE']],
+                    body: rows,
+                    startY: 30,
+                    theme: 'grid',
+                    headStyles: { fillColor: [46, 91, 255] }
+                });
+
+                // الطريقة المضمونة للهواتف: كيحول الملف لـ Data URL وكيفتحه
+                const pdfData = doc.output('bloburl');
+                window.open(pdfData, '_blank');
+                
+            } catch (error) {
+                alert("وقع مشكل فاش بغينا نصاوبوا PDF. جرب دير تحديث للصفحة.");
+            }
         }
 
         for(let i=0; i<8; i++) addRow();
     </script>
 </body>
 </html>
+
